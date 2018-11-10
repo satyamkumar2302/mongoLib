@@ -19,7 +19,7 @@ button_return.pack(padx=25, pady=25)
 button_addbook = Button(main, text="Add a book to Library", command=lambda:addbookfn())
 button_addbook.pack(padx=25, pady=25)
 
-button_rmbook = Button(main, text="Remove a book from Library")
+button_rmbook = Button(main, text="Remove a book from Library", command=lambda:rmbookfn())
 button_rmbook.pack(padx=25, pady=25)
 
 def addbookfn():
@@ -51,5 +51,31 @@ def insertdb(ebname,eaname,eisbn):
     val = {"Book Name":bname, "Author Name":aname, "ISBN":isbn}
     x = mybooks.insert_one(val)
 
+def rmbookfn():
+    smain = Tk()
+    smain.geometry("400x600")
+    lbox = Listbox(smain, width=150)
+    for x in mybooks.find({},{"_id":0,"Book Name":1,"Author Name":1,"ISBN":1}):
+        x = dict(x)
+        lbox.insert(1,x)
+    lbox.pack()
+
+    label_rm = Label(smain, text="Enter ISBN of book to remove from Library")
+    label_rm.pack()
+
+    entry_rm = Entry(smain)
+    entry_rm.pack()
+
+    button_rm = Button(smain, text="Remove", command=lambda:rmdb(entry_rm))
+    button_rm.pack()
+
+def rmdb(rmisbn):
+    isbn = rmisbn.get()
+    myquery = {"ISBN":isbn}
+    mybooks.delete_one(myquery)
+
+        
+    
+    
     
     
