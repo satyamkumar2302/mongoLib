@@ -9,18 +9,23 @@ bookdb = myclient["Librarydb"]
 mybooks = bookdb["allBooks"]
 rentedbooks = bookdb["rentedBooks"]
 
+def home():
+    button_addbook = Button(main, text="Add a book to Library", command=lambda:addbookfn())
+    button_addbook.pack(padx=25, pady=25)
 
-button_rent = Button(main, text="Rent a book",command=lambda:rentbookfn())
-button_rent.pack(padx=25, pady=25)
+    button_rmbook = Button(main, text="Remove a book from Library", command=lambda:rmbookfn())
+    button_rmbook.pack(padx=25, pady=25)
 
-button_return = Button(main, text="Return a book",command=lambda:retbookfn())
-button_return.pack(padx=25, pady=25)
+    button_rent = Button(main, text="Rent a book",command=lambda:rentbookfn())
+    button_rent.pack(padx=25, pady=25)
 
-button_addbook = Button(main, text="Add a book to Library", command=lambda:addbookfn())
-button_addbook.pack(padx=25, pady=25)
+    button_return = Button(main, text="Return a book",command=lambda:retbookfn())
+    button_return.pack(padx=25, pady=25)
 
-button_rmbook = Button(main, text="Remove a book from Library", command=lambda:rmbookfn())
-button_rmbook.pack(padx=25, pady=25)
+    button_upbook = Button(main, text="Update book Details",command=lambda:upbookfn())
+    button_upbook.pack(padx=25, pady=25)
+
+    
 
 def addbookfn():
     smain = Tk()
@@ -43,13 +48,15 @@ def addbookfn():
     button_submit = Button(smain, text="Add", command=lambda:insertdb(entry_bname, entry_aname, entry_isbn))
     button_submit.grid(row=20, column=10)
 
-def insertdb(ebname,eaname,eisbn):
-    bname = ebname.get()
-    aname = eaname.get()
-    isbn = eisbn.get()
+    def insertdb(ebname,eaname,eisbn):
+        bname = ebname.get()
+        aname = eaname.get()
+        isbn = eisbn.get()
 
-    val = {"Book Name":bname, "Author Name":aname, "ISBN":isbn}
-    x = mybooks.insert_one(val)
+        val = {"Book Name":bname, "Author Name":aname, "ISBN":isbn}
+        x = mybooks.insert_one(val)
+        smain.destroy()
+
 
 def rmbookfn():
     smain = Tk()
@@ -69,10 +76,11 @@ def rmbookfn():
     button_rm = Button(smain, text="Remove", command=lambda:rmdb(entry_rm))
     button_rm.pack()
 
-def rmdb(rmisbn):
-    isbn = rmisbn.get()
-    myquery = {"ISBN":isbn}
-    mybooks.delete_one(myquery)
+    def rmdb(rmisbn):
+        isbn = rmisbn.get()
+        myquery = {"ISBN":isbn}
+        mybooks.delete_one(myquery)
+        smain.destroy()
 
 def rentbookfn():
     smain = Tk()
@@ -92,12 +100,13 @@ def rentbookfn():
     button_rent = Button(smain, text="Rent", command=lambda:rentbook(entry_rent))
     button_rent.pack()
 
-def rentbook(erent):
-    rent = erent.get()
-    for x in mybooks.find():
-        if x["ISBN"]==rent:
-            rentedbooks.insert_one(x)
-            mybooks.delete_one(x)
+    def rentbook(erent):
+        rent = erent.get()
+        for x in mybooks.find():
+            if x["ISBN"]==rent:
+                rentedbooks.insert_one(x)
+                mybooks.delete_one(x)
+        smain.destroy()
 
 def retbookfn():
     smain = Tk()
@@ -117,13 +126,51 @@ def retbookfn():
     button_ret = Button(smain, text="Return", command=lambda:retbook(entry_ret))
     button_ret.pack()
 
-def retbook(eret):
-    ret = eret.get()
-    for x in rentedbooks.find():
-        if x["ISBN"]==ret:
-            rentedbooks.delete_one(x)
-            mybooks.insert_one(x)
+    def retbook(eret):
+        ret = eret.get()
+        for x in rentedbooks.find():
+            if x["ISBN"]==ret:
+                rentedbooks.delete_one(x)
+                mybooks.insert_one(x)
+        smain.destroy()
+
+
+def upbookfn():
+    smain = Tk()
+    smain.geometry("300x200")
     
+    label_isbn = Label(smain, text="Enter ISBN of book to update")
+    label_isbn.pack()
+    entry_isbn = Entry(smain)
+    entry_isbn.pack()
+
+    label_newbname = Label(smain, text="Enter new book name")
+    label_newbname.pack()
+    entry_newbname = Entry(smain)
+    entry_newbname.pack()
+
+    label_newaname = Label(smain, text="Enter new author name")
+    label_newaname.pack()
+    entry_newaname = Entry(smain)
+    entry_newaname.pack()
+
+    button_up = Button(smain, text="update", command=lambda:updb(entry_isbn, entry_newbname, entry_newaname))
+    button_up.pack()
+
+    def updb(eisbn, ebname, eaname):
+        isbn = eisbn.get()
+        bname = ebname.get()
+        aname = eaname.get()
+
+        for x in mybooks.find():
+            if x["ISBN"]==isbn:
+                oldval = {"Book Name":x["Book Name"], "Author Name":x["Author Name"]}
+                newval = {"$set":{"Book Name":bname, "Author Name":aname}}
+                mybooks.update_one(oldval, newval)
+                smain.destroy()
+
+
+home()
     
     
 
